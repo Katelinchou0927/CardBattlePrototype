@@ -14,3 +14,18 @@ UserSettings/
 *.unityproj
 
 .vscode/
+# Unity
+/[Ll]ibrary/
+/[Tt]emp/
+/[Oo]bj/
+/[Bb]uild/
+/[Bb]uilds/
+/[Ll]ogs/
+/[Uu]ser[Ss]ettings/
+
+# VS/MD solution
+.vs/
+*.sln
+*.suo
+*.user
+*.userprefs
