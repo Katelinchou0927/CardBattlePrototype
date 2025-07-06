@@ -81,8 +81,15 @@ public class GameManager : MonoBehaviour
 
             int number = numbers[i];
             Sprite cardSprite = GetCardSprite(number, suit);
+            
             display.SetCardFace(cardSprite);
-            display.ShowFront();
+
+            //  根据玩家显示正面或背面
+            if (ownerId == "Player1")
+                display.ShowFront();
+            else
+                display.ShowBack();
+
 
             CardData data = cardGO.GetComponent<CardData>();
             data.ownerId = ownerId;

@@ -3,16 +3,24 @@
   "WorkspaceRootPath": "D:\\Software\\Github\\CardBattlePrototype\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\Software\\Github\\CardBattlePrototype\\Assets\\Scripts\\Models\\CardData.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Assets\\Scripts\\Models\\CardData.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\Software\\Github\\CardBattlePrototype\\Assets\\Scripts\\Models\\GameManager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Assets\\Scripts\\Models\\GameManager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\Software\\Github\\CardBattlePrototype\\Assets\\Scripts\\UI\\TranferClick.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Assets\\Scripts\\UI\\TranferClick.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\Software\\Github\\CardBattlePrototype\\Assets\\Scripts\\Models\\CardData.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Assets\\Scripts\\Models\\CardData.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\Software\\Github\\CardBattlePrototype\\Assets\\Scripts\\Models\\CardDisplay.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Assets\\Scripts\\Models\\CardDisplay.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\Software\\Github\\CardBattlePrototype\\Assets\\Scripts\\Core\\BattleLifecycleManager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Assets\\Scripts\\Core\\BattleLifecycleManager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -22,43 +30,69 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 1,
+          "SelectedChildIndex": 2,
           "Children": [
             {
               "$type": "Document",
               "DocumentIndex": 1,
-              "Title": "GameManager.cs",
-              "DocumentMoniker": "D:\\Software\\Github\\CardBattlePrototype\\Assets\\Scripts\\Models\\GameManager.cs",
-              "RelativeDocumentMoniker": "Assets\\Scripts\\Models\\GameManager.cs",
-              "ToolTip": "D:\\Software\\Github\\CardBattlePrototype\\Assets\\Scripts\\Models\\GameManager.cs",
-              "RelativeToolTip": "Assets\\Scripts\\Models\\GameManager.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAEcAAAAAAAAAAAAAAA==",
+              "Title": "TranferClick.cs",
+              "DocumentMoniker": "D:\\Software\\Github\\CardBattlePrototype\\Assets\\Scripts\\UI\\TranferClick.cs",
+              "RelativeDocumentMoniker": "Assets\\Scripts\\UI\\TranferClick.cs",
+              "ToolTip": "D:\\Software\\Github\\CardBattlePrototype\\Assets\\Scripts\\UI\\TranferClick.cs",
+              "RelativeToolTip": "Assets\\Scripts\\UI\\TranferClick.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-07-05T15:49:50.003Z",
+              "WhenOpened": "2025-07-06T15:58:52.315Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 2,
               "Title": "CardData.cs",
               "DocumentMoniker": "D:\\Software\\Github\\CardBattlePrototype\\Assets\\Scripts\\Models\\CardData.cs",
               "RelativeDocumentMoniker": "Assets\\Scripts\\Models\\CardData.cs",
               "ToolTip": "D:\\Software\\Github\\CardBattlePrototype\\Assets\\Scripts\\Models\\CardData.cs",
               "RelativeToolTip": "Assets\\Scripts\\Models\\CardData.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAZAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-07-05T15:41:38.335Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 0,
+              "Title": "GameManager.cs",
+              "DocumentMoniker": "D:\\Software\\Github\\CardBattlePrototype\\Assets\\Scripts\\Models\\GameManager.cs",
+              "RelativeDocumentMoniker": "Assets\\Scripts\\Models\\GameManager.cs",
+              "ToolTip": "D:\\Software\\Github\\CardBattlePrototype\\Assets\\Scripts\\Models\\GameManager.cs",
+              "RelativeToolTip": "Assets\\Scripts\\Models\\GameManager.cs",
+              "ViewState": "AgIAALoAAAAAAAAAAAAAALwAAABBAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-07-05T15:49:50.003Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "BattleLifecycleManager.cs",
+              "DocumentMoniker": "D:\\Software\\Github\\CardBattlePrototype\\Assets\\Scripts\\Core\\BattleLifecycleManager.cs",
+              "RelativeDocumentMoniker": "Assets\\Scripts\\Core\\BattleLifecycleManager.cs",
+              "ToolTip": "D:\\Software\\Github\\CardBattlePrototype\\Assets\\Scripts\\Core\\BattleLifecycleManager.cs",
+              "RelativeToolTip": "Assets\\Scripts\\Core\\BattleLifecycleManager.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABYAAAAdAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-07-06T13:07:53.957Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
               "Title": "CardDisplay.cs",
               "DocumentMoniker": "D:\\Software\\Github\\CardBattlePrototype\\Assets\\Scripts\\Models\\CardDisplay.cs",
               "RelativeDocumentMoniker": "Assets\\Scripts\\Models\\CardDisplay.cs",
               "ToolTip": "D:\\Software\\Github\\CardBattlePrototype\\Assets\\Scripts\\Models\\CardDisplay.cs",
               "RelativeToolTip": "Assets\\Scripts\\Models\\CardDisplay.cs",
-              "ViewState": "AgIAACIAAAAAAAAAAADwvzAAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAB0AAAAAAAAAAAAqwC8AAAA0AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-07-05T15:38:44.409Z",
               "EditorCaption": ""
