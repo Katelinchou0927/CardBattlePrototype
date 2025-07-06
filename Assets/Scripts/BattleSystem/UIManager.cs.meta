@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: 528436a9c834c354cbfe0f7b14053bd4
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - roundText: {instanceID: 0}
+  - turnText: {instanceID: 0}
+  - logText: {instanceID: 0}
+  - playerUIPrefab: {instanceID: 0}
+  - playersPanel: {instanceID: 0}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
