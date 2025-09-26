@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+<<<<<<<< Updated upstream:Assets/Scripts/Core/CardSelectionManager.cs.meta
+guid: 0f5c58491c68afd4196ce425906cdfa9
+========
+guid: a337680b52725c84091c6e25526a98dd
+>>>>>>>> Stashed changes:Assets/Scripts/Core/AICardSelector.cs.meta
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

@@ -12,7 +12,7 @@ PlayerSettings:
   targetDevice: 2
   useOnDemandResources: 0
   accelerometerFrequency: 60
-  companyName: DefaultCompany
+  companyName: "\u7231\u6D1B\u514B&\u897F\u6D66"
   productName: Card Battle Prototype
   defaultCursor: {fileID: 0}
   cursorHotspot: {x: 0, y: 0}

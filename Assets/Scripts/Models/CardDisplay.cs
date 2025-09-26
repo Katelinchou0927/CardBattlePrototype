@@ -4,16 +4,16 @@ using UnityEngine;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
-using TMPro; // ÒòÎªLabelÊÇTMP¸ñÊ½
+using TMPro; // å› ä¸ºLabelæ˜¯TMPæ ¼å¼
 
 
 public class CardDisplay : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 
 {
-    public RectTransform offsetContainer; // ÊÖ¶¯ÔÚ Inspector °ó¶¨ OffsetContainer
-    public Image frontImage;  // ¿¨ÃæÍ¼
-    public Image backImage;   // ¿¨±³Í¼
-    public TMP_Text label; // ÔÚPrefabÀï¼ÓÒ»¸öTextÀ´±ê¼Ç¡°HP¡±»ò¡°ATK¡±
+    public RectTransform offsetContainer; // æ‰‹åŠ¨åœ¨ Inspector ç»‘å®š OffsetContainer
+    public Image frontImage;  // å¡é¢å›¾
+    public Image backImage;   // å¡èƒŒå›¾
+    public TMP_Text label; // åœ¨Prefabé‡ŒåŠ ä¸€ä¸ªTextæ¥æ ‡è®°â€œHPâ€æˆ–â€œATKâ€
 
     private CardData data;
     public bool isSelected = false;
@@ -30,28 +30,28 @@ public class CardDisplay : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
 
 
 
-    //»½ĞÑY×ø±ê
+    //å”¤é†’Yåæ ‡
     void Start()
     {
         if (offsetContainer == null)
         {
-            Debug.LogError("Î´°ó¶¨ offsetContainer£¡");
+            Debug.LogError("æœªç»‘å®š offsetContainerï¼");
             return;
         }
 
         originalOffset = offsetContainer.localPosition;
     }
     
-    // Êó±êĞüÍ£Ê±Ì§¸ß
+    // é¼ æ ‡æ‚¬åœæ—¶æŠ¬é«˜
     public void OnPointerEnter(PointerEventData eventData)
     {
         if (data.ownerId == "Player1" && !data.used)
         {
-            offsetContainer.localPosition = originalOffset + new Vector3(0, 20, 0); // Ì§¸ßÊÓ¾õ
+            offsetContainer.localPosition = originalOffset + new Vector3(0, 20, 0); // æŠ¬é«˜è§†è§‰
         }
     }
 
-    // Êó±êÀë¿ªÊ±»¹Ô­
+    // é¼ æ ‡ç¦»å¼€æ—¶è¿˜åŸ
     public void OnPointerExit(PointerEventData eventData)
     {
         if (offsetContainer != null)
@@ -64,12 +64,12 @@ public class CardDisplay : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
     {
         if (cardSprite == null)
         {
-            Debug.LogError("cardSprite Îª null£¬Çë¼ì²é GetCardSprite ÊÇ·ñÕÒµ½ÁËÍ¼£¡");
+            Debug.LogError("cardSprite ä¸º nullï¼Œè¯·æ£€æŸ¥ GetCardSprite æ˜¯å¦æ‰¾åˆ°äº†å›¾ï¼");
         }
 
         if (frontImage == null)
         {
-            Debug.LogError("frontImage Î´°ó¶¨£¬ÇëÔÚ prefab ÖĞ°ó¶¨ Image ×é¼ş£¡");
+            Debug.LogError("frontImage æœªç»‘å®šï¼Œè¯·åœ¨ prefab ä¸­ç»‘å®š Image ç»„ä»¶ï¼");
         }
 
         frontImage.sprite = cardSprite;
@@ -89,12 +89,12 @@ public class CardDisplay : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
     }
 
   /*
-    // GameManager Òªµ÷ÓÃµÄ,²»ÖªµÀÎªÊ²Ã´Òªµ÷ÓÃ£¬×ÜÖ®Ã»ÓĞÕâ¸ö»á±¨´í
+    // GameManager è¦è°ƒç”¨çš„,ä¸çŸ¥é“ä¸ºä»€ä¹ˆè¦è°ƒç”¨ï¼Œæ€»ä¹‹æ²¡æœ‰è¿™ä¸ªä¼šæŠ¥é”™
     public void RefreshUI()
     {
         if (data == null) data = GetComponent<CardData>();
 
-        // ¸ù¾İ¿¨ÅÆÀàĞÍ¸Ä±äÑÕÉ«
+        // æ ¹æ®å¡ç‰Œç±»å‹æ”¹å˜é¢œè‰²
         Color color = Color.white;
         switch (data.cardType)
         {
@@ -111,38 +111,84 @@ public class CardDisplay : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
 
     */
 
-    public void RefreshUI()
-    {
-        if (data == null) data = GetComponent<CardData>();
+  public void RefreshUI()
+  {
+      if (data == null) data = GetComponent<CardData>();
 
-        Color color = Color.white;
-        string labelText = "";
-        // ¸ù¾İ¿¨ÅÆÀàĞÍ¸Ä±ä±êÇ©
-        switch (data.cardType)
-        {
-            case CardType.Attack:
-                color = Color.red;
-                labelText = "ATK";
-                break;
-            case CardType.Defense:
-                color = Color.blue;
-                labelText = "HP";
-                break;
-            default:
-                labelText = "";
-                break;
-        }
+      Color color = Color.white;
+      string labelText = "";
+    
+      // æ£€æŸ¥æ˜¯å¦æ˜¯æŠ€èƒ½ç‰Œ
+      bool isSkillCard = data.number >= 11 && data.number <= 13;
+    
+      if (isSkillCard)
+      {
+          // æŠ€èƒ½ç‰Œæ˜¾ç¤ºé€»è¾‘
+          switch (data.number)
+          {
+              case 11: // J
+                  color = Color.red;
+                  labelText = "J";
+                  break;
+              case 12: // Q
+                  color = Color.green;
+                  labelText = "Q";
+                  break;
+              case 13: // K
+                  color = Color.blue;
+                  labelText = "K";
+                  break;
+          }
+        
+          // å¦‚æœæŠ€èƒ½å·²ä½¿ç”¨ï¼Œé™ä½é€æ˜åº¦
+          if (data.used)
+          {
+              color.a = 0.3f;
+              labelText += " (USED)";
+          }
+      }
+      else
+      {
+          // æ•°å­—ç‰Œæ˜¾ç¤ºé€»è¾‘
+          switch (data.cardType)
+          {
+              case CardType.Attack:
+                  color = Color.red;
+                  labelText = "ATK";
+                  break;
+              case CardType.Defense:
+                  color = Color.blue;
+                  labelText = "HP";
+                  break;
+              default:
+                  labelText = "";
+                  break;
+          }
 
-        if (data.used)
-            color.a = 0.3f;
+          if (data.used)
+              color.a = 0.3f;
+      }
 
-        frontImage.color = color;
-        if (label != null) label.text = labelText;
-    }
+      frontImage.color = color;
+      if (label != null) label.text = labelText;
+  }
 
     public void OnPointerClick(PointerEventData eventData)
     {
-        GameManager.Instance.OnCardClicked(this); // µ÷ÓÃGameManager´¦ÀíÂß¼­
+        CardData cardData = GetData();
+        if (cardData == null) return;
+
+        // æ ¹æ®å¡ç‰Œç±»å‹è°ƒç”¨ä¸åŒçš„å¤„ç†æ–¹æ³•
+        if (cardData.cardType == CardType.Special && cardData.number >= 11 && cardData.number <= 13)
+        {
+            // æŠ€èƒ½ç‰Œç‚¹å‡» - åªæœ‰åœ¨æˆ˜æ–—é˜¶æ®µæ‰å“åº”
+            GameManager.Instance.OnSkillCardClicked(this);
+        }
+        else
+        {
+            // æ•°å­—ç‰Œç‚¹å‡» - ç”¨äºHP/ATKé€‰æ‹©
+            GameManager.Instance.OnCardClicked(this);
+        }
     }
 
 

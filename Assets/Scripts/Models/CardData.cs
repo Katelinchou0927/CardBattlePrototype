@@ -11,11 +11,9 @@ public enum CardType
 
 public class CardData : MonoBehaviour
 {
-    public string ownerId;       // Íæ¼ÒID»òÃû×Ö
-    public int number;           // Êı×Ö£º1~10
-    public CardType cardType;    // ÀàĞÍ£º¹¥»÷¡¢·ÀÓùµÈ
-    public bool used = false;    // ÊÇ·ñÒÑÊ¹ÓÃ
-
-   
+    public string ownerId;       // ç©å®¶IDæˆ–åå­—
+    public int number;           // æ•°å­—ï¼š1~10
+    public CardType cardType;    // ç±»å‹ï¼šæ”»å‡»ã€é˜²å¾¡ç­‰
+    public bool used = false;    // æ˜¯å¦å·²ä½¿ç”¨
 }
 

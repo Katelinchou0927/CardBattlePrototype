@@ -8,8 +8,20 @@ public class BattleUIManager : MonoBehaviour
 {
     [Header("UI References")]
     public GameObject battlePanel;           // 战斗主面板
+
+    [Header("Player Card Areas - 4 Positions")]
+    public Transform player1CardArea;        // 下方（人类玩家）
+    public Transform player2CardArea;        // 上方（AI玩家1）
+    public Transform player3CardArea;        // 左侧（AI玩家2）
+    public Transform player4CardArea;        // 右侧（AI玩家3）
+
+    [Header("Player Card Prefab")]
     public GameObject playerCardPrefab;      // 玩家卡片预制体
-    public Transform playersContainer;       // 玩家容器
+
+    [Header("Character Art Resources")]
+    public Sprite[] characterArtSprites;     // 角色美术资源数组
+
+    [Header("Battle Info")]
     public TextMeshProUGUI roundText;        // 回合显示
     public TextMeshProUGUI turnText;         // 轮次显示
     public TextMeshProUGUI battleLogText;    // 战斗日志
@@ -31,8 +43,10 @@ public class BattleUIManager : MonoBehaviour
         public TextMeshProUGUI attackText;
         public Slider hpSlider;
         public Image backgroundImage;
+        public Image characterArtImage;      // 角色美术图片
         public Image attackHighlight;
         public Image targetHighlight;
+        public int playerIndex;              // 玩家索引（0-3）
     }
 
     void Awake()
@@ -40,6 +54,33 @@ public class BattleUIManager : MonoBehaviour
         // 确保战斗面板初始时隐藏
         if (battlePanel != null)
             battlePanel.SetActive(false);
+    
+        // 初始化日志系统
+        InitializeLogSystem();
+    }
+
+    void InitializeLogSystem()
+    {
+        if (battleLogText != null)
+        {
+            battleLogText.text = "";
+            battleLog = "";
+        
+            RectTransform logTextRect = battleLogText.GetComponent<RectTransform>();
+            RectTransform contentRect = logTextRect.parent.GetComponent<RectTransform>();
+        
+            logTextRect.anchorMin = new Vector2(0, 1);
+            logTextRect.anchorMax = new Vector2(1, 1);
+            logTextRect.pivot = new Vector2(0.5f, 1);
+        
+            logTextRect.offsetMin = new Vector2(10, -100);
+            logTextRect.offsetMax = new Vector2(-10, 0);
+        
+            if (contentRect != null)
+            {
+                contentRect.sizeDelta = new Vector2(contentRect.sizeDelta.x, 100);
+            }
+        }
     }
 
     public void ShowBattleUI()
@@ -47,7 +88,7 @@ public class BattleUIManager : MonoBehaviour
         if (battlePanel != null)
             battlePanel.SetActive(true);
         
-        Debug.Log("[BattleUI] Battle UI shown");
+        Debug.Log("[BattleUI] Battle UI shown with 4-player layout");
     }
 
     public void HideBattleUI()
@@ -60,64 +101,117 @@ public class BattleUIManager : MonoBehaviour
 
     public void InitializePlayers(List<BattlePlayer> players)
     {
-        Debug.Log($"[BattleUI] Initializing UI for {players.Count} players");
+        Debug.Log($"[BattleUI] Initializing UI for {players.Count} players in 4-position layout");
         
-        // 清除现有玩家卡片
         ClearPlayerCards();
 
-        // 为每个玩家创建UI卡片
-        foreach (BattlePlayer player in players)
+        for (int i = 0; i < players.Count && i < 4; i++)
         {
-            CreatePlayerCard(player);
+            CreatePlayerCard(players[i], i);
         }
 
-        // 显示战斗UI
         ShowBattleUI();
         
-        // 初始化战斗信息
         UpdateRoundInfo(1, 0);
         AddBattleLog("Battle Start!");
         AddBattleLog($"{players.Count} players enter the battlefield!");
     }
 
-    void CreatePlayerCard(BattlePlayer player)
+    void CreatePlayerCard(BattlePlayer player, int playerIndex)
     {
-        if (playerCardPrefab == null || playersContainer == null)
+        Transform targetArea = GetPlayerCardArea(playerIndex);
+        
+        if (targetArea == null || playerCardPrefab == null)
         {
-            Debug.LogError("[BattleUI] Player card prefab or container not assigned!");
+            Debug.LogError($"[BattleUI] Cannot create card for player {playerIndex} - missing references!");
             return;
         }
 
-        GameObject cardObj = Instantiate(playerCardPrefab, playersContainer);
+        GameObject cardObj = Instantiate(playerCardPrefab, targetArea);
         PlayerCard playerCard = new PlayerCard
         {
             player = player,
-            cardObject = cardObj
+            cardObject = cardObj,
+            playerIndex = playerIndex
         };
 
         // 查找UI组件
-        playerCard.nameText = cardObj.transform.Find("NameText")?.GetComponent<TextMeshProUGUI>();
-        playerCard.hpText = cardObj.transform.Find("HPText")?.GetComponent<TextMeshProUGUI>();
-        playerCard.attackText = cardObj.transform.Find("AttackText")?.GetComponent<TextMeshProUGUI>();
-        playerCard.hpSlider = cardObj.transform.Find("HPSlider")?.GetComponent<Slider>();
+        Transform[] allChildren = cardObj.GetComponentsInChildren<Transform>();
+        
+        foreach (Transform child in allChildren)
+        {
+            string childName = child.name.ToLower();
+            
+            if (childName.Contains("name"))
+                playerCard.nameText = child.GetComponent<TextMeshProUGUI>();
+            else if (childName.Contains("hp") && childName.Contains("text"))
+                playerCard.hpText = child.GetComponent<TextMeshProUGUI>();
+            else if (childName.Contains("attack") && childName.Contains("text"))
+                playerCard.attackText = child.GetComponent<TextMeshProUGUI>();
+            else if (childName.Contains("slider"))
+                playerCard.hpSlider = child.GetComponent<Slider>();
+            else if (childName.Contains("characterart") || childName.Contains("character"))
+                playerCard.characterArtImage = child.GetComponent<Image>();
+            else if (childName.Contains("attackhighlight"))
+                playerCard.attackHighlight = child.GetComponent<Image>();
+            else if (childName.Contains("targethighlight"))
+                playerCard.targetHighlight = child.GetComponent<Image>();
+        }
+
         playerCard.backgroundImage = cardObj.GetComponent<Image>();
-        playerCard.attackHighlight = cardObj.transform.Find("AttackHighlight")?.GetComponent<Image>();
-        playerCard.targetHighlight = cardObj.transform.Find("TargetHighlight")?.GetComponent<Image>();
+
+        // Debug输出
+        Debug.Log($"[BattleUI] Player {playerIndex} components found:");
+        Debug.Log($"- NameText: {(playerCard.nameText != null ? "✓" : "✗")}");
+        Debug.Log($"- HPText: {(playerCard.hpText != null ? "✓" : "✗")}");
+        Debug.Log($"- AttackText: {(playerCard.attackText != null ? "✓" : "✗")}");
+        Debug.Log($"- HPSlider: {(playerCard.hpSlider != null ? "✓" : "✗")}");
+        Debug.Log($"- CharacterArt: {(playerCard.characterArtImage != null ? "✓" : "✗")}");
+
+        // 设置角色美术
+        SetCharacterArt(playerCard, playerIndex);
 
         // 初始化UI显示
         UpdatePlayerCard(playerCard);
         
-        // 添加到列表
         playerCards.Add(playerCard);
         
-        Debug.Log($"[BattleUI] Created card for {player.name}");
+        Debug.Log($"[BattleUI] Created card for {player.name} at position {playerIndex}");
+    }
+
+    Transform GetPlayerCardArea(int playerIndex)
+    {
+        switch (playerIndex)
+        {
+            case 0: return player1CardArea; // 下方（人类玩家）
+            case 1: return player2CardArea; // 上方（AI玩家1）
+            case 2: return player3CardArea; // 左侧（AI玩家2）
+            case 3: return player4CardArea; // 右侧（AI玩家3）
+            default: 
+                Debug.LogWarning($"[BattleUI] Invalid player index: {playerIndex}");
+                return player1CardArea;
+        }
+    }
+
+    void SetCharacterArt(PlayerCard playerCard, int playerIndex)
+    {
+        if (playerCard.characterArtImage == null) return;
+
+        if (characterArtSprites != null && playerIndex < characterArtSprites.Length)
+        {
+            playerCard.characterArtImage.sprite = characterArtSprites[playerIndex];
+            Debug.Log($"[BattleUI] Set character art for player {playerIndex}");
+        }
+        else
+        {
+            Debug.LogWarning($"[BattleUI] No character art found for player {playerIndex}");
+        }
     }
 
     void UpdatePlayerCard(PlayerCard playerCard)
     {
         BattlePlayer player = playerCard.player;
 
-        // 更新文本
         if (playerCard.nameText != null)
             playerCard.nameText.text = player.name;
 
@@ -127,14 +221,12 @@ public class BattleUIManager : MonoBehaviour
         if (playerCard.attackText != null)
             playerCard.attackText.text = $"ATK: {player.attack}";
 
-        // 更新血量条
         if (playerCard.hpSlider != null)
         {
             playerCard.hpSlider.maxValue = player.maxHP;
             playerCard.hpSlider.value = player.currentHP;
         }
 
-        // 更新背景颜色表示状态
         if (playerCard.backgroundImage != null)
         {
             if (player.isEliminated)
@@ -155,7 +247,6 @@ public class BattleUIManager : MonoBehaviour
             }
         }
 
-        // 隐藏高亮效果
         if (playerCard.attackHighlight != null)
             playerCard.attackHighlight.gameObject.SetActive(false);
         
@@ -190,14 +281,12 @@ public class BattleUIManager : MonoBehaviour
         PlayerCard attackerCard = GetPlayerCard(attacker);
         PlayerCard targetCard = GetPlayerCard(target);
 
-        // 显示攻击者高亮
         if (attackerCard?.attackHighlight != null)
         {
             attackerCard.attackHighlight.gameObject.SetActive(true);
             attackerCard.attackHighlight.color = Color.red;
         }
 
-        // 显示目标高亮
         if (targetCard?.targetHighlight != null)
         {
             targetCard.targetHighlight.gameObject.SetActive(true);
@@ -208,7 +297,6 @@ public class BattleUIManager : MonoBehaviour
 
         yield return new WaitForSeconds(attackAnimationDuration);
 
-        // 隐藏高亮
         if (attackerCard?.attackHighlight != null)
             attackerCard.attackHighlight.gameObject.SetActive(false);
         
@@ -227,7 +315,6 @@ public class BattleUIManager : MonoBehaviour
         
         if (targetCard != null)
         {
-            // 闪烁效果
             Image bg = targetCard.backgroundImage;
             Color originalColor = bg.color;
             
@@ -239,7 +326,6 @@ public class BattleUIManager : MonoBehaviour
                 yield return new WaitForSeconds(0.1f);
             }
 
-            // 更新UI
             UpdatePlayerCard(targetCard);
         }
 
@@ -257,7 +343,6 @@ public class BattleUIManager : MonoBehaviour
         {
             AddBattleLog($"BATTLE END! {winner.name} wins!");
             
-            // 高亮胜利者
             PlayerCard winnerCard = GetPlayerCard(winner);
             if (winnerCard?.backgroundImage != null)
             {
@@ -282,33 +367,57 @@ public class BattleUIManager : MonoBehaviour
 
     public void AddBattleLog(string message)
     {
-        battleLog = message + "\n" + battleLog;
-        
+        battleLog = battleLog + message + "\n";
+    
         if (battleLogText != null)
         {
             battleLogText.text = battleLog;
-            
-            // 限制日志长度
-            if (battleLog.Length > 1000)
+        
+            if (battleLog.Length > 2000)
             {
-                battleLog = battleLog.Substring(0, 1000);
+                battleLog = battleLog.Substring(battleLog.Length - 2000);
                 battleLogText.text = battleLog;
             }
+        
+            battleLogText.ForceMeshUpdate();
+        
+            float textHeight = battleLogText.preferredHeight;
+        
+            RectTransform logTextRect = battleLogText.GetComponent<RectTransform>();
+            logTextRect.sizeDelta = new Vector2(logTextRect.sizeDelta.x, textHeight);
+        
+            RectTransform contentRect = logTextRect.parent.GetComponent<RectTransform>();
+            if (contentRect != null)
+            {
+                contentRect.sizeDelta = new Vector2(contentRect.sizeDelta.x, textHeight + 20);
+            }
         }
-
-        // 自动滚动到底部
+    
         if (logScrollRect != null)
         {
-            StartCoroutine(ScrollToBottom());
+            StartCoroutine(ScrollToBottomNextFrame());
         }
-
-        Debug.Log($"[BattleUI] {message}");
     }
 
-    IEnumerator ScrollToBottom()
+    IEnumerator ScrollToBottomNextFrame()
     {
         yield return new WaitForEndOfFrame();
-        logScrollRect.verticalNormalizedPosition = 0f;
+    
+        if (logScrollRect != null)
+        {
+            Canvas.ForceUpdateCanvases();
+        
+            if (logScrollRect.content != null)
+            {
+                float contentHeight = logScrollRect.content.rect.height;
+                float viewportHeight = logScrollRect.viewport.rect.height;
+            
+                if (contentHeight > viewportHeight)
+                {
+                    logScrollRect.verticalNormalizedPosition = 0f;
+                }
+            }
+        }
     }
 
     void ClearPlayerCards()
@@ -316,7 +425,7 @@ public class BattleUIManager : MonoBehaviour
         foreach (PlayerCard card in playerCards)
         {
             if (card.cardObject != null)
-                Destroy(card.cardObject);
+                Destroy(card.gameObject);
         }
         playerCards.Clear();
     }
