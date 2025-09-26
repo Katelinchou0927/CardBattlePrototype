@@ -425,7 +425,7 @@ public class BattleUIManager : MonoBehaviour
         foreach (PlayerCard card in playerCards)
         {
             if (card.cardObject != null)
-                Destroy(card.gameObject);
+                Destroy(card.cardObject);
         }
         playerCards.Clear();
     }
