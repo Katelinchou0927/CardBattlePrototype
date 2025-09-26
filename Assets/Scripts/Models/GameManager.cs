@@ -22,9 +22,7 @@ public class GameManager : MonoBehaviour
 
     [Header("Skill Card Areas - Only for Players with Skills")]
     public Transform player1SkillArea;  // 技能牌区域
-    public Transform player2SkillArea;  // 预留给有技能的AI
-    public Transform player3SkillArea;  
-    public Transform player4SkillArea;  
+
 
 // 技能牌列表（与数字牌分离）
     private List<CardData> player1SkillCards = new List<CardData>();
@@ -249,9 +247,6 @@ Transform GetSkillArea(string ownerId)
     switch (ownerId)
     {
         case "Player1": return player1SkillArea;
-        case "Player2": return player2SkillArea;
-        case "Player3": return player3SkillArea;
-        case "Player4": return player4SkillArea;
         default: return null;
     }
 }
@@ -401,18 +396,7 @@ List<CardData> GetSkillCardList(string ownerId)
         {
             foreach (Transform child in player1SkillArea) Destroy(child.gameObject);
         }
-        if (player2SkillArea != null)
-        {
-            foreach (Transform child in player2SkillArea) Destroy(child.gameObject);
-        }
-        if (player3SkillArea != null)
-        {
-            foreach (Transform child in player3SkillArea) Destroy(child.gameObject);
-        }
-        if (player4SkillArea != null)
-        {
-            foreach (Transform child in player4SkillArea) Destroy(child.gameObject);
-        }
+
     
         // 清空所有卡牌列表
         player1Cards.Clear();
