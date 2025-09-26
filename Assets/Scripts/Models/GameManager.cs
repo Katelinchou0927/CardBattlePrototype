@@ -22,6 +22,16 @@ public class GameManager : MonoBehaviour
 
     [Header("Skill Card Areas - Only for Players with Skills")]
     public Transform player1SkillArea;  // 技能牌区域
+    public Transform player2SkillArea;  // 预留给有技能的AI
+    public Transform player3SkillArea;  
+    public Transform player4SkillArea;  
+
+// 技能牌列表（与数字牌分离）
+    private List<CardData> player1SkillCards = new List<CardData>();
+    private List<CardData> player2SkillCards = new List<CardData>();
+    private List<CardData> player3SkillCards = new List<CardData>();
+    private List<CardData> player4SkillCards = new List<CardData>();
+
 
     [Header("UI Panels")]
     public GameObject cardSelectionPanel;
@@ -31,9 +41,6 @@ public class GameManager : MonoBehaviour
     private List<CardData> player2Cards = new List<CardData>();
     private List<CardData> player3Cards = new List<CardData>();
     private List<CardData> player4Cards = new List<CardData>();
-
-    // 技能牌列表（与数字牌分离）
-    private List<CardData> player1SkillCards = new List<CardData>();
 
     private CardData selectedHpCard = null;
     private CardData selectedAtkCard = null;
@@ -97,154 +104,22 @@ public class GameManager : MonoBehaviour
     }
 
     /// <summary>
-    /// Get player character info for battle system
+    /// Start game with skill reset
     /// </summary>
-    public (int characterIndex, bool hasSkills, string characterName) GetPlayerCharacterInfo()
-    {
-        return (selectedCharacterIndex, playerHasSkills, selectedCharacterName);
-    }
-
-    /// <summary>
-    /// Check if player has specified skill (for battle system)
-    /// </summary>
-    public bool PlayerHasSkill(string skillType)
-    {
-        if (!playerHasSkills) return false;
-        
-        // All skill-capable characters have J, Q, K skills, just with different effects
-        return skillType == "J" || skillType == "Q" || skillType == "K";
-    }
-
-    /// <summary>
-    /// Get skill description in English (for UI display)
-    /// </summary>
-    public string GetSkillDescription(string skillType)
-    {
-        if (!playerHasSkills) return "";
-        
-        switch (selectedCharacterIndex)
-        {
-            case 1: // Field Commander - Area Effect Skills
-                switch (skillType)
-                {
-                    case "J": return "All players lose 2 HP";
-                    case "Q": return "All players gain 1 HP"; 
-                    case "K": return "All players lose 1 ATK";
-                    default: return "";
-                }
-            case 2: // Shadow Duelist - Personal Skills
-                switch (skillType)
-                {
-                    case "J": return "Exchange HP/ATK with target";
-                    case "Q": return "Gain 5 HP for yourself";
-                    case "K": return "Survive fatal attack with 1 HP";
-                    default: return "";
-                }
-            default:
-                return "";
-        }
-    }
-
-    /// <summary>
-    /// Get detailed skill description for tooltips/help
-    /// </summary>
-    public string GetDetailedSkillDescription(string skillType)
-    {
-        if (!playerHasSkills) return "";
-        
-        switch (selectedCharacterIndex)
-        {
-            case 1: // Field Commander - Area Effect Skills
-                switch (skillType)
-                {
-                    case "J": return "Global Damage: All players on the battlefield take 2 damage";
-                    case "Q": return "Global Heal: All players on the battlefield recover 1 HP";
-                    case "K": return "Global Weaken: All players on the battlefield lose 1 attack power";
-                    default: return "";
-                }
-            case 2: // Shadow Duelist - Personal Skills  
-                switch (skillType)
-                {
-                    case "J": return "Stat Exchange: Swap your HP or ATK with target player";
-                    case "Q": return "Self Heal: Restore 5 HP to yourself";
-                    case "K": return "Last Stand: When receiving fatal damage, survive with 1 HP instead";
-                    default: return "";
-                }
-            default:
-                return "";
-        }
-    }
-
-    /// <summary>
-    /// Reset skills for new game (called at game start)
-    /// </summary>
-    public void ResetSkillsForNewGame()
-    {
-        // Reset the skill UI manager's tracking
-        SkillUIManager.ResetAllSkills();
-        Debug.Log("[GameManager] Skills reset for new 5-round game");
-    }
-
-    /// <summary>
-    /// Get available skills for current player (one-time use aware)
-    /// </summary>
-    public List<string> GetCurrentlyAvailableSkills()
-    {
-        if (!playerHasSkills) return new List<string>();
-        
-        // Get skills that haven't been used yet from the UI manager
-        SkillUIManager skillUI = FindObjectOfType<SkillUIManager>();
-        if (skillUI != null)
-        {
-            return skillUI.GetAvailableSkills();
-        }
-        
-        // Fallback: assume all skills available if UI manager not found
-        return new List<string> { "J", "Q", "K" };
-    }
-
-    /// <summary>
-    /// Get character name in English
-    /// </summary>
-    public string GetCharacterNameEnglish()
-    {
-        switch (selectedCharacterIndex)
-        {
-            case 0: return "Basic Warrior";
-            case 1: return "Field Commander";
-            case 2: return "Shadow Duelist";
-            default: return "Unknown Character";
-        }
-    }
-
-    /// <summary>
-    /// Get character description in English
-    /// </summary>
-    public string GetCharacterDescription()
-    {
-        switch (selectedCharacterIndex)
-        {
-            case 0: return "No special abilities. Relies on pure strategy.";
-            case 1: return "Area effect skills that impact all players on the battlefield.";
-            case 2: return "Personal combat skills with powerful individual effects.";
-            default: return "Unknown character type.";
-        }
-    }
-
     public void StartGame()
     {
         Debug.Log($"[GameManager] Starting game with character: {selectedCharacterName}");
-        
+    
         currentRound = 1;
         usedCards.Clear();
-        
+    
         // Reset skills for new game (important for one-time use rule)
         if (playerHasSkills)
         {
             ResetSkillsForNewGame();
             Debug.Log("[GameManager] One-time skills reset: J, Q, K available");
         }
-        
+    
         // Start first round card selection
         StartRoundCardSelection();
     }
@@ -256,23 +131,17 @@ public class GameManager : MonoBehaviour
     {
         Debug.Log($"[GameManager] Starting Round {currentRound} card selection for 4 players with character skills: {playerHasSkills}");
         
-        // 隐藏技能区域（选牌阶段不显示技能卡）
-        if (player1SkillArea != null && player1SkillArea.gameObject != null)
-        {
-            player1SkillArea.gameObject.SetActive(false);
-        }
-        
         // 清除现有卡牌
         ClearPlayerHands();
         
         // 计算当前轮可用的卡牌（排除已使用的）
         List<int> availableCards = GetAvailableCards();
         
-        // 生成当前轮的卡牌 - 4个玩家，选牌阶段不显示技能牌
-        DealAvailableCards("Player1", "club", player1HandArea, player1Cards, availableCards, false);    // 人类玩家（下方）
-        DealAvailableCards("Player2", "diamond", player2HandArea, player2Cards, availableCards, false); // AI玩家1（上方）
-        DealAvailableCards("Player3", "heart", player3HandArea, player3Cards, availableCards, false);   // AI玩家2（左侧）
-        DealAvailableCards("Player4", "spade", player4HandArea, player4Cards, availableCards, false);   // AI玩家3（右侧）
+        // 生成当前轮的卡牌 - 4个玩家，只有Player1可能有技能牌
+        DealAvailableCards("Player1", "club", player1HandArea, player1Cards, availableCards, playerHasSkills);    // 人类玩家（下方）
+        DealAvailableCards("Player2", "diamond", player2HandArea, player2Cards, availableCards, false);           // AI玩家1（上方）
+        DealAvailableCards("Player3", "heart", player3HandArea, player3Cards, availableCards, false);             // AI玩家2（左侧）
+        DealAvailableCards("Player4", "spade", player4HandArea, player4Cards, availableCards, false);             // AI玩家3（右侧）
 
         // 重置选择状态
         ResetSelectionState();
@@ -328,93 +197,115 @@ public class GameManager : MonoBehaviour
             cardList.Add(data);
             display.RefreshUI();
         }
-        
+    
         Debug.Log($"[GameManager] Created {availableCards.Count} number cards for {ownerId} in {suit} suit");
         // 注意：不再在这里创建技能牌！
     }
 
-    /// <summary>
-    /// 在战斗开始时创建技能卡牌显示
-    /// </summary>
-    void InitializeBattlePhaseSkillCards()
+/// <summary>
+/// 创建技能牌（独立方法）
+/// </summary>
+void CreateSkillCards(string ownerId, string suit)
+{
+    Transform skillArea = GetSkillArea(ownerId);
+    List<CardData> skillCardList = GetSkillCardList(ownerId);
+    
+    if (skillArea == null)
     {
-        if (player1SkillArea == null || !playerHasSkills)
-        {
-            return;
-        }
-
-        Debug.Log("[GameManager] Creating battle phase skill cards display");
-
-        // 清空现有内容
-        foreach (Transform child in player1SkillArea)
-        {
-            Destroy(child.gameObject);
-        }
-        player1SkillCards.Clear();
-
-        // 创建J、Q、K技能卡牌
-        string[] skills = { "J", "Q", "K" };
-        foreach (string skill in skills)
-        {
-            CreateBattlePhaseSkillCard(skill);
-        }
-
-        // 确保技能区域可见
-        if (player1SkillArea.gameObject != null)
-        {
-            player1SkillArea.gameObject.SetActive(true);
-        }
+        Debug.LogError($"[GameManager] No skill area found for {ownerId}");
+        return;
     }
 
-    /// <summary>
-    /// 创建单个战斗阶段技能卡牌
-    /// </summary>
-    void CreateBattlePhaseSkillCard(string skillType)
+    // 创建J、Q、K技能牌
+    string[] skills = { "J", "Q", "K" };
+    foreach (string skill in skills)
     {
-        GameObject cardGO = Instantiate(cardPrefab, player1SkillArea);
+        GameObject cardGO = Instantiate(cardPrefab, skillArea);
         CardDisplay display = cardGO.GetComponent<CardDisplay>();
 
         // 获取技能卡牌图片
-        Sprite skillSprite = GetSkillCardSprite(skillType, "club"); // 默认使用club花色
+        Sprite skillSprite = GetSkillCardSprite(skill, suit);
         display.SetCardFace(skillSprite);
         display.ShowFront(); // 技能卡总是显示正面
 
         CardData data = cardGO.GetComponent<CardData>();
-        data.ownerId = "Player1";
-        data.number = GetSkillCardNumber(skillType);
+        data.ownerId = ownerId;
+        data.number = GetSkillCardNumber(skill);
         data.cardType = CardType.Special;
-        data.used = false; // 初始状态为可用
+        data.used = false;
 
-        player1SkillCards.Add(data);
+        skillCardList.Add(data);
         display.RefreshUI();
+        
+        Debug.Log($"[GameManager] Created {skill} skill card for {ownerId}");
+    }
+}
 
-        Debug.Log($"[GameManager] Created battle phase skill card: {skillType}");
+/// <summary>
+/// 获取技能牌区域
+/// </summary>
+Transform GetSkillArea(string ownerId)
+{
+    switch (ownerId)
+    {
+        case "Player1": return player1SkillArea;
+        case "Player2": return player2SkillArea;
+        case "Player3": return player3SkillArea;
+        case "Player4": return player4SkillArea;
+        default: return null;
+    }
+}
+
+/// <summary>
+/// 获取技能牌列表
+/// </summary>
+List<CardData> GetSkillCardList(string ownerId)
+{
+    switch (ownerId)
+    {
+        case "Player1": return player1SkillCards;
+        case "Player2": return player2SkillCards;
+        case "Player3": return player3SkillCards;
+        case "Player4": return player4SkillCards;
+        default: return new List<CardData>();
+    }
+}
+
+
+    /// <summary>
+    /// 获取技能卡牌的数字标识
+    /// </summary>
+    int GetSkillCardNumber(string skillType)
+    {
+        switch (skillType)
+        {
+            case "J": return 11; // J = 11
+            case "Q": return 12; // Q = 12  
+            case "K": return 13; // K = 13
+            default: return 0;
+        }
     }
 
     /// <summary>
-    /// 更新战斗阶段技能卡牌状态
+    /// 检查是否为技能卡
     /// </summary>
-    void UpdateBattlePhaseSkillCards()
+    bool IsSkillCard(CardData card)
     {
-        if (player1SkillCards.Count == 0) return;
+        return card.number >= 11 && card.number <= 13;
+    }
 
-        foreach (var skillCard in player1SkillCards)
+    /// <summary>
+    /// 获取技能类型
+    /// </summary>
+    string GetSkillType(CardData card)
+    {
+        switch (card.number)
         {
-            string skillType = GetSkillType(skillCard);
-            bool isUsed = SkillUIManager.IsSkillUsedStatic(skillType);
-            
-            // 更新使用状态
-            skillCard.used = isUsed;
-            
-            // 刷新UI显示
-            var display = skillCard.GetComponent<CardData>();
-            if (display != null)
-            {
-                display.GetComponent<CardDisplay>().RefreshUI();
-            }
+            case 11: return "J";
+            case 12: return "Q";
+            case 13: return "K";
+            default: return "";
         }
-
-        Debug.Log("[GameManager] Updated battle phase skill cards status");
     }
 
     /// <summary>
@@ -432,7 +323,7 @@ public class GameManager : MonoBehaviour
             $"skill_{skillType}",                             // skill_J
             $"{skillType}"                                    // J
         };
-        
+    
         Debug.Log($"[GameManager] Looking for skill card with these names:");
         foreach (string name in possibleNames)
         {
@@ -483,42 +374,6 @@ public class GameManager : MonoBehaviour
     }
 
     /// <summary>
-    /// 获取技能卡牌的数字标识
-    /// </summary>
-    int GetSkillCardNumber(string skillType)
-    {
-        switch (skillType)
-        {
-            case "J": return 11; // J = 11
-            case "Q": return 12; // Q = 12  
-            case "K": return 13; // K = 13
-            default: return 0;
-        }
-    }
-
-    /// <summary>
-    /// 检查是否为技能卡
-    /// </summary>
-    bool IsSkillCard(CardData card)
-    {
-        return card.number >= 11 && card.number <= 13;
-    }
-
-    /// <summary>
-    /// 获取技能类型
-    /// </summary>
-    string GetSkillType(CardData card)
-    {
-        switch (card.number)
-        {
-            case 11: return "J";
-            case 12: return "Q";
-            case 13: return "K";
-            default: return "";
-        }
-    }
-
-    /// <summary>
     /// 清空所有玩家手牌（包括技能牌区域）
     /// </summary>
     void ClearPlayerHands()
@@ -540,15 +395,36 @@ public class GameManager : MonoBehaviour
         {
             foreach (Transform child in player4HandArea) Destroy(child.gameObject);
         }
-        
+    
+        // 清空技能牌区域
+        if (player1SkillArea != null)
+        {
+            foreach (Transform child in player1SkillArea) Destroy(child.gameObject);
+        }
+        if (player2SkillArea != null)
+        {
+            foreach (Transform child in player2SkillArea) Destroy(child.gameObject);
+        }
+        if (player3SkillArea != null)
+        {
+            foreach (Transform child in player3SkillArea) Destroy(child.gameObject);
+        }
+        if (player4SkillArea != null)
+        {
+            foreach (Transform child in player4SkillArea) Destroy(child.gameObject);
+        }
+    
         // 清空所有卡牌列表
         player1Cards.Clear();
         player2Cards.Clear();
         player3Cards.Clear();
         player4Cards.Clear();
-        
+    
         player1SkillCards.Clear();
-        
+        player2SkillCards.Clear();
+        player3SkillCards.Clear();
+        player4SkillCards.Clear();
+    
         Debug.Log("[GameManager] Cleared all 4 players' hand areas and skill areas");
     }
 
@@ -565,7 +441,7 @@ public class GameManager : MonoBehaviour
     }
 
     /// <summary>
-    /// 显示选牌界面
+    /// Show card selection UI with English text
     /// </summary>
     void ShowCardSelectionUI()
     {
@@ -586,11 +462,18 @@ public class GameManager : MonoBehaviour
             confirmButton.interactable = false;
             confirmButton.onClick.RemoveAllListeners();
             confirmButton.onClick.AddListener(OnConfirmClicked);
-            
-            // English button text
-            confirmButton.GetComponentInChildren<TMP_Text>().text = $"Round {currentRound} - Select ATK";
-        }
         
+            // English button text
+            if (playerHasSkills)
+            {
+                confirmButton.GetComponentInChildren<TMP_Text>().text = $"Round {currentRound} - Select ATK (Numbers Only)";
+            }
+            else
+            {
+                confirmButton.GetComponentInChildren<TMP_Text>().text = $"Round {currentRound} - Confirm ATK";
+            }
+        }
+    
         Debug.Log($"[GameManager] Round {currentRound} card selection UI shown for 4 players, battle UI hidden");
     }
 
@@ -615,7 +498,7 @@ public class GameManager : MonoBehaviour
         // 只处理数字牌的HP/ATK选择
         HandleNumberCardSelection(data, clicked);
     }
-
+    
     /// <summary>
     /// 处理数字牌选择逻辑
     /// </summary>
@@ -657,7 +540,7 @@ public class GameManager : MonoBehaviour
                 data.cardType = CardType.Defense;
             }
         }
-        
+    
         Debug.Log($"Round {currentRound} - Clicked number {data.number}, current type: {data.cardType}");
 
         // 刷新所有人类玩家卡牌显示
@@ -666,16 +549,19 @@ public class GameManager : MonoBehaviour
         // 更新确认按钮状态和文本
         UpdateConfirmButton();
     }
+    
 
     /// <summary>
-    /// 更新确认按钮状态和文本
+    /// Update confirm button with English text
     /// </summary>
     void UpdateConfirmButton()
     {
         if (!atkConfirmed && selectedAtkCard != null)
         {
             confirmButton.interactable = true;
-            confirmButton.GetComponentInChildren<TMP_Text>().text = $"Confirm ATK {selectedAtkCard.number}";
+            bool isSkill = IsSkillCard(selectedAtkCard);
+            string cardInfo = isSkill ? $"{GetSkillType(selectedAtkCard)} Skill" : $"ATK {selectedAtkCard.number}";
+            confirmButton.GetComponentInChildren<TMP_Text>().text = $"Confirm {cardInfo}";
         }
         else if (atkConfirmed && !hpConfirmed && selectedHpCard != null)
         {
@@ -685,7 +571,7 @@ public class GameManager : MonoBehaviour
         else if (atkConfirmed && !hpConfirmed)
         {
             confirmButton.interactable = false;
-            confirmButton.GetComponentInChildren<TMP_Text>().text = $"Round {currentRound} - Select HP";
+            confirmButton.GetComponentInChildren<TMP_Text>().text = $"Round {currentRound} - Select HP (Numbers Only)";
         }
         else
         {
@@ -701,11 +587,11 @@ public class GameManager : MonoBehaviour
         // 刷新人类玩家数字牌显示
         foreach (var card in player1Cards)
             card.GetComponent<CardDisplay>().RefreshUI();
-        
+    
         // 刷新人类玩家技能牌显示
         foreach (var card in player1SkillCards)
             card.GetComponent<CardDisplay>().RefreshUI();
-        
+    
         // 刷新其他AI玩家卡牌显示（虽然是背面，但可能需要状态更新）
         foreach (var card in player2Cards)
             card.GetComponent<CardDisplay>().RefreshUI();
@@ -715,40 +601,198 @@ public class GameManager : MonoBehaviour
             card.GetComponent<CardDisplay>().RefreshUI();
     }
 
-    public void OnConfirmClicked()
+    /// <summary>
+/// 技能牌点击处理（战斗阶段使用）
+/// </summary>
+public void OnSkillCardClicked(CardDisplay clicked)
+{
+    CardData data = clicked.GetData();
+    if (data.used) return;
+    if (!IsSkillCard(data)) return;
+    if (data.ownerId != "Player1") return;
+
+    string skillType = GetSkillType(data);
+    
+    // 根据当前游戏状态决定是否可以使用技能
+    if (!CanUseSkill(skillType))
     {
-        if (!atkConfirmed && selectedAtkCard != null)
-        {
-            selectedAtkCard.used = true;
-            atkConfirmed = true;
-            confirmButton.interactable = false;
-
-            Debug.Log($"Round {currentRound} - Attack confirmed: ATK = {selectedAtkCard.number}");
-            
-            confirmButton.GetComponentInChildren<TMP_Text>().text = $"Round {currentRound} - Select HP";
-        }
-        else if (atkConfirmed && !hpConfirmed && selectedHpCard != null)
-        {
-            selectedHpCard.used = true;
-            hpConfirmed = true;
-            confirmButton.interactable = true;
-            
-            Debug.Log($"Round {currentRound} - HP confirmed: HP = {selectedHpCard.number}");
-            confirmButton.GetComponentInChildren<TMP_Text>().text = $"Start Round {currentRound} Battle";
-
-            confirmButton.onClick.RemoveAllListeners();
-            confirmButton.onClick.AddListener(StartBattle);
-        }
-
-        RefreshAllPlayerCards();
+        Debug.Log($"[GameManager] Cannot use skill {skillType} at this time");
+        return;
     }
+
+    // 标记技能为已使用
+    data.used = true;
+    clicked.RefreshUI();
+
+    // 通知战斗系统使用了技能
+    NotifySkillUsed(skillType);
+    
+    Debug.Log($"[GameManager] Player used skill: {skillType}");
+}
+
+/// <summary>
+/// 检查是否可以使用指定技能
+/// </summary>
+bool CanUseSkill(string skillType)
+{
+    // 只有在战斗阶段才能使用技能
+    BattleLifecycleManager battleManager = FindObjectOfType<BattleLifecycleManager>();
+    if (battleManager == null || battleManager.CurrentState != BattleLifecycleManager.GameState.Resolving)
+    {
+        return false;
+    }
+
+    switch (skillType)
+    {
+        case "J": // 即死攻击 - 只能在攻击时使用
+            return true;
+        case "Q": // 全场回血 - 任何时候都可以使用
+            return true;
+        case "K": // 绝对防御 - 只能在受到攻击时使用
+            return true;
+        default:
+            return false;
+    }
+}
+
+/// <summary>
+/// 通知战斗系统技能被使用
+/// </summary>
+void NotifySkillUsed(string skillType)
+{
+    // 通过PlayerPrefs或事件系统通知战斗系统
+    PlayerPrefs.SetString("UsedSkill", skillType);
+    PlayerPrefs.SetInt("SkillUsedThisTurn", 1);
+    
+    // 或者直接调用战斗系统的方法
+    AdvancedBattleSystem battleSystem = FindObjectOfType<AdvancedBattleSystem>();
+    if (battleSystem != null)
+    {
+        // battleSystem.HandlePlayerSkill(skillType);
+    }
+}
+
+/// <summary>
+/// 获取玩家当前可用的技能列表
+/// </summary>
+public List<string> GetAvailableSkills(string playerId = "Player1")
+{
+    List<string> availableSkills = new List<string>();
+    List<CardData> skillCards = GetSkillCardList(playerId);
+    
+    foreach (var skill in skillCards)
+    {
+        if (!skill.used)
+        {
+            availableSkills.Add(GetSkillType(skill));
+        }
+    }
+    
+    return availableSkills;
+}
+
+/// <summary>
+/// 重置技能牌状态（用于新游戏或特殊情况）
+/// </summary>
+public void ResetSkillCards(string playerId = "Player1")
+{
+    List<CardData> skillCards = GetSkillCardList(playerId);
+    
+    foreach (var skill in skillCards)
+    {
+        skill.used = false;
+        skill.GetComponent<CardDisplay>().RefreshUI();
+    }
+    
+    Debug.Log($"[GameManager] Reset all skill cards for {playerId}");
+}
+
+/// <summary>
+/// Handle confirm button click with English feedback
+/// </summary>
+public void OnConfirmClicked()
+{
+    if (!atkConfirmed && selectedAtkCard != null)
+    {
+        selectedAtkCard.used = true;
+        atkConfirmed = true;
+        confirmButton.interactable = false;
+
+        bool isSkill = IsSkillCard(selectedAtkCard);
+        string cardInfo = isSkill ? $"{GetSkillType(selectedAtkCard)} skill" : $"ATK = {selectedAtkCard.number}";
+        Debug.Log($"Round {currentRound} - Attack confirmed: {cardInfo}");
+        
+        confirmButton.GetComponentInChildren<TMP_Text>().text = $"Round {currentRound} - Select HP (Numbers Only)";
+    }
+    else if (atkConfirmed && !hpConfirmed && selectedHpCard != null)
+    {
+        selectedHpCard.used = true;
+        hpConfirmed = true;
+        confirmButton.interactable = true;
+        
+        Debug.Log($"Round {currentRound} - HP confirmed: HP = {selectedHpCard.number}");
+        confirmButton.GetComponentInChildren<TMP_Text>().text = $"Start Round {currentRound} Battle";
+
+        confirmButton.onClick.RemoveAllListeners();
+        confirmButton.onClick.AddListener(StartBattle);
+    }
+
+    RefreshAllPlayerCards();
+}
+
+/// <summary>
+/// Get available skills for current player (one-time use aware)
+/// </summary>
+public List<string> GetCurrentlyAvailableSkills()
+{
+    if (!playerHasSkills) return new List<string>();
+    
+    // Get skills that haven't been used yet from the UI manager
+    SkillUIManager skillUI = FindObjectOfType<SkillUIManager>();
+    if (skillUI != null)
+    {
+        return skillUI.GetAvailableSkills();
+    }
+    
+    // Fallback: assume all skills available if UI manager not found
+    return new List<string> { "J", "Q", "K" };
+}
+
+/// <summary>
+/// Get character name in English
+/// </summary>
+public string GetCharacterNameEnglish()
+{
+    switch (selectedCharacterIndex)
+    {
+        case 0: return "Basic Warrior";
+        case 1: return "Field Commander";
+        case 2: return "Shadow Duelist";
+        default: return "Unknown Character";
+    }
+}
+
+/// <summary>
+/// Get character description in English
+/// </summary>
+public string GetCharacterDescription()
+{
+    switch (selectedCharacterIndex)
+    {
+        case 0: return "No special abilities. Relies on pure strategy.";
+        case 1: return "Area effect skills that impact all players on the battlefield.";
+        case 2: return "Personal combat skills with powerful individual effects.";
+        default: return "Unknown character type.";
+    }
+}
+
 
     void StartBattle()
     {
         // 记录本轮使用的卡牌（只记录数字牌）
         if (selectedHpCard.number > 0 && selectedHpCard.number <= 10)
             usedCards.Add(selectedHpCard.number);
-        if (selectedAtkCard.number > 0 && selectedAtkCard.number <= 10)
+        if (selectedAtkCard.number > 0 && selectedAtkCard.number <= 10)  // 技能牌的number是11-13，不记录
             usedCards.Add(selectedAtkCard.number);
         
         // 隐藏选牌界面
@@ -757,15 +801,18 @@ public class GameManager : MonoBehaviour
         
         confirmButton.gameObject.SetActive(false);
         
-        Debug.Log($"Round {currentRound} Battle starts! ATK = {selectedAtkCard.number}, HP = {selectedHpCard.number}");
+        bool isSkillAttack = IsSkillCard(selectedAtkCard);
+        string atkInfo = isSkillAttack ? $"Skill {GetSkillType(selectedAtkCard)}" : $"ATK {selectedAtkCard.number}";
+        Debug.Log($"Round {currentRound} Battle starts! {atkInfo}, HP = {selectedHpCard.number}");
         Debug.Log($"Used cards so far: [{string.Join(", ", usedCards)}]");
         
         // 获取选择值
         int playerHP = selectedHpCard.number;
-        int playerATK = selectedAtkCard.number;
+        int playerATK = isSkillAttack ? 0 : selectedAtkCard.number;  // 技能牌攻击力为0
+        string playerSkill = isSkillAttack ? GetSkillType(selectedAtkCard) : "";
         
-        // 初始化战斗系统
-        InitializeBattleSystem(playerHP, playerATK);
+        // 初始化战斗系统 - 使用3个参数的版本
+        InitializeBattleSystem(playerHP, playerATK, playerSkill);
     }
 
     /// <summary>
@@ -774,12 +821,6 @@ public class GameManager : MonoBehaviour
     public void OnRoundComplete()
     {
         currentRound++;
-        
-        // 更新技能卡牌状态（如果有的话）
-        if (playerHasSkills)
-        {
-            UpdateBattlePhaseSkillCards();
-        }
         
         if (currentRound <= 5 && usedCards.Count < 10)
         {
@@ -799,37 +840,35 @@ public class GameManager : MonoBehaviour
         StartRoundCardSelection();
     }
 
-    void InitializeBattleSystem(int playerHP, int playerATK)
+    void InitializeBattleSystem(int playerHP, int playerATK, string playerSkill = "")
     {
-        Debug.Log($"[GameManager] Initializing battle with HP: {playerHP}, ATK: {playerATK}");
-
+        Debug.Log($"[GameManager] Initializing battle with HP: {playerHP}, ATK: {playerATK}, Skill: {playerSkill}");
+    
         // 完全隐藏选牌界面
         if (cardSelectionPanel != null)
             cardSelectionPanel.SetActive(false);
-
-        // 如果是第一轮且玩家有技能，创建技能卡牌显示
-        if (currentRound == 1 && playerHasSkills)
-        {
-            InitializeBattlePhaseSkillCards();
-        }
-        else if (playerHasSkills)
-        {
-            // 后续轮次，更新技能卡牌状态并显示
-            UpdateBattlePhaseSkillCards();
-            if (player1SkillArea != null && player1SkillArea.gameObject != null)
-            {
-                player1SkillArea.gameObject.SetActive(true);
-            }
-        }
-
+    
         AdvancedBattleSystem battleSystem = FindObjectOfType<AdvancedBattleSystem>();
         if (battleSystem == null)
         {
             Debug.LogError("[GameManager] AdvancedBattleSystem not found!");
             return;
         }
-
+    
+        // 使用原有的3参数InitializeBattle方法
         battleSystem.InitializeBattle(playerHP, playerATK, currentRound);
+        
+        // 如果有技能选择，可以通过其他方式传递给战斗系统
+        if (!string.IsNullOrEmpty(playerSkill))
+        {
+            Debug.Log($"[GameManager] Player selected skill: {playerSkill} for character: {selectedCharacterName}");
+            // 可以通过PlayerPrefs或其他方式传递技能信息
+            PlayerPrefs.SetString("CurrentRoundSkill", playerSkill);
+        }
+        else
+        {
+            PlayerPrefs.SetString("CurrentRoundSkill", "");
+        }
         
         Debug.Log($"[GameManager] Battle initialized for Round {currentRound}, card selection UI hidden");
     }
@@ -883,8 +922,9 @@ public class GameManager : MonoBehaviour
     public (int hp, int atk, string skill) GetSelectedValues()
     {
         int hp = selectedHpCard != null ? selectedHpCard.number : 0;
-        int atk = selectedAtkCard != null ? selectedAtkCard.number : 0;
-        string skill = ""; // 技能通过SkillUIManager单独处理
+        bool isSkillAttack = selectedAtkCard != null && IsSkillCard(selectedAtkCard);
+        int atk = selectedAtkCard != null && !isSkillAttack ? selectedAtkCard.number : 0;
+        string skill = selectedAtkCard != null && isSkillAttack ? GetSkillType(selectedAtkCard) : "";
         return (hp, atk, skill);
     }
 
@@ -903,6 +943,95 @@ public class GameManager : MonoBehaviour
         return new List<int>(usedCards);
     }
 
+    /// <summary>
+/// Get player character info for battle system
+/// </summary>
+public (int characterIndex, bool hasSkills, string characterName) GetPlayerCharacterInfo()
+{
+    return (selectedCharacterIndex, playerHasSkills, selectedCharacterName);
+}
+
+/// <summary>
+/// Check if player has specified skill (for battle system)
+/// </summary>
+public bool PlayerHasSkill(string skillType)
+{
+    if (!playerHasSkills) return false;
+    
+    // All skill-capable characters have J, Q, K skills, just with different effects
+    return skillType == "J" || skillType == "Q" || skillType == "K";
+}
+
+/// <summary>
+/// Get skill description in English (for UI display)
+/// </summary>
+public string GetSkillDescription(string skillType)
+{
+    if (!playerHasSkills) return "";
+    
+    switch (selectedCharacterIndex)
+    {
+        case 1: // Field Commander - Area Effect Skills
+            switch (skillType)
+            {
+                case "J": return "All players lose 2 HP";
+                case "Q": return "All players gain 1 HP"; 
+                case "K": return "All players lose 1 ATK";
+                default: return "";
+            }
+        case 2: // Shadow Duelist - Personal Skills
+            switch (skillType)
+            {
+                case "J": return "Exchange HP/ATK with target";
+                case "Q": return "Gain 5 HP for yourself";
+                case "K": return "Survive fatal attack with 1 HP";
+                default: return "";
+            }
+        default:
+            return "";
+    }
+}
+
+/// <summary>
+/// Get detailed skill description for tooltips/help
+/// </summary>
+public string GetDetailedSkillDescription(string skillType)
+{
+    if (!playerHasSkills) return "";
+    
+    switch (selectedCharacterIndex)
+    {
+        case 1: // Field Commander - Area Effect Skills
+            switch (skillType)
+            {
+                case "J": return "Global Damage: All players on the battlefield take 2 damage";
+                case "Q": return "Global Heal: All players on the battlefield recover 1 HP";
+                case "K": return "Global Weaken: All players on the battlefield lose 1 attack power";
+                default: return "";
+            }
+        case 2: // Shadow Duelist - Personal Skills  
+            switch (skillType)
+            {
+                case "J": return "Stat Exchange: Swap your HP or ATK with target player";
+                case "Q": return "Self Heal: Restore 5 HP to yourself";
+                case "K": return "Last Stand: When receiving fatal damage, survive with 1 HP instead";
+                default: return "";
+            }
+        default:
+            return "";
+    }
+}
+
+/// <summary>
+/// Reset skills for new game (called at game start)
+/// </summary>
+public void ResetSkillsForNewGame()
+{
+    // Reset the skill UI manager's tracking
+    SkillUIManager.ResetAllSkills();
+    Debug.Log("[GameManager] Skills reset for new 5-round game");
+}
+    
     /// <summary>
     /// 获取所有玩家的手牌数量（用于调试）
     /// </summary>

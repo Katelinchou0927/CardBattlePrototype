@@ -15,8 +15,13 @@ public class SkillUIManager : MonoBehaviour
     public Button skillQ_Button;                 
     public Button skillK_Button;                 
     public Button skillSkip_Button;              // 新增：跳过按钮
-    public TextMeshProUGUI skillPromptText; 
-    
+    public TextMeshProUGUI skillPromptText;      
+
+    [Header("Skip Button Settings")]
+    public string skipButtonText = "Skip";
+    public string skipButtonDescription = "Don't use any skill";
+    public Color skipButtonColor = Color.gray;
+
     [Header("UI Customization")]
     [Range(3f, 15f)]
     public float skillDecisionTime = 8f;         // Decision time in seconds
@@ -34,11 +39,6 @@ public class SkillUIManager : MonoBehaviour
     public Color unavailableButtonColor = Color.gray;
     public Color selectedButtonColor = Color.green;
     
-    [Header("Skip Button Settings")]
-    public string skipButtonText = "Skip";
-    public string skipButtonDescription = "Don't use any skill";
-    public Color skipButtonColor = Color.gray;
-    
     [Space(10)]
     [Header("Animation Settings")]
     public bool enableButtonAnimation = true;
@@ -47,8 +47,7 @@ public class SkillUIManager : MonoBehaviour
 
     [Header("Debug Settings")]
     public bool showDebugLogs = true;
-    
-    
+
     // Private variables
     private bool waitingForSkillDecision = false;
     private bool skillDecisionMade = false;
@@ -97,7 +96,7 @@ public class SkillUIManager : MonoBehaviour
     }
 
     /// <summary>
-    /// Show skill selection panel (called during battle phase)
+    /// 显示技能选择面板，修改提示文本
     /// </summary>
     public IEnumerator ShowSkillChoice(string situation, PlayerData player)
     {
@@ -166,7 +165,7 @@ public class SkillUIManager : MonoBehaviour
     }
 
     /// <summary>
-    /// Update skill button display and availability
+    /// 更新技能按钮显示，包括跳过按钮
     /// </summary>
     void UpdateSkillButtons(string situation, (int characterIndex, bool hasSkills, string characterName) characterInfo)
     {
@@ -294,7 +293,7 @@ public class SkillUIManager : MonoBehaviour
     }
 
     /// <summary>
-    /// Skill selection callback
+    /// 技能选择回调，处理跳过逻辑
     /// </summary>
     void OnSkillSelected(string skill)
     {
