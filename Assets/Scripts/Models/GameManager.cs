@@ -450,7 +450,7 @@ List<CardData> GetSkillCardList(string ownerId)
             // English button text
             if (playerHasSkills)
             {
-                confirmButton.GetComponentInChildren<TMP_Text>().text = $"Round {currentRound} - Select ATK (Numbers Only)";
+                confirmButton.GetComponentInChildren<TMP_Text>().text = $"Round {currentRound} - Select ATK";
             }
             else
             {
@@ -555,7 +555,7 @@ List<CardData> GetSkillCardList(string ownerId)
         else if (atkConfirmed && !hpConfirmed)
         {
             confirmButton.interactable = false;
-            confirmButton.GetComponentInChildren<TMP_Text>().text = $"Round {currentRound} - Select HP (Numbers Only)";
+            confirmButton.GetComponentInChildren<TMP_Text>().text = $"Round {currentRound} - Select HP";
         }
         else
         {
@@ -706,7 +706,7 @@ public void OnConfirmClicked()
         string cardInfo = isSkill ? $"{GetSkillType(selectedAtkCard)} skill" : $"ATK = {selectedAtkCard.number}";
         Debug.Log($"Round {currentRound} - Attack confirmed: {cardInfo}");
         
-        confirmButton.GetComponentInChildren<TMP_Text>().text = $"Round {currentRound} - Select HP (Numbers Only)";
+        confirmButton.GetComponentInChildren<TMP_Text>().text = $"Round {currentRound} - Select HP";
     }
     else if (atkConfirmed && !hpConfirmed && selectedHpCard != null)
     {
