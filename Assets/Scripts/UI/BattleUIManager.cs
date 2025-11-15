@@ -197,14 +197,17 @@ public class BattleUIManager : MonoBehaviour
     {
         if (playerCard.characterArtImage == null) return;
 
-        if (characterArtSprites != null && playerIndex < characterArtSprites.Length)
+        // 使用 BattlePlayer 中存储的角色索引，而不是玩家位置索引
+        int characterIndex = playerCard.player.characterIndex;
+    
+        if (characterArtSprites != null && characterIndex < characterArtSprites.Length)
         {
-            playerCard.characterArtImage.sprite = characterArtSprites[playerIndex];
-            Debug.Log($"[BattleUI] Set character art for player {playerIndex}");
+            playerCard.characterArtImage.sprite = characterArtSprites[characterIndex];
+            Debug.Log($"[BattleUI] Set character art for {playerCard.player.name} using character index {characterIndex}");
         }
         else
         {
-            Debug.LogWarning($"[BattleUI] No character art found for player {playerIndex}");
+            Debug.LogWarning($"[BattleUI] No character art found for character index {characterIndex}");
         }
     }
 

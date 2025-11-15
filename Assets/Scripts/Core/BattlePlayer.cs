@@ -1,7 +1,5 @@
 using UnityEngine;
-/// <summary>
-/// 战斗玩家数据类（供UI显示使用）
-/// </summary>
+
 [System.Serializable]
 public class BattlePlayer
 {
@@ -10,6 +8,12 @@ public class BattlePlayer
     public int currentHP;
     public int attack;
     public bool isEliminated;
+    
+    // 新增：角色信息
+    public int characterIndex;        // 角色索引（0-3）
+    public bool hasSkills;            // 是否有技能
+    public Sprite characterArt;       // 角色图片（可选）
+
     public BattlePlayer(string playerName, int hp, int atk)
     {
         name = playerName;
@@ -17,6 +21,22 @@ public class BattlePlayer
         currentHP = hp;
         attack = atk;
         isEliminated = false;
+        characterIndex = 0;
+        hasSkills = false;
+        characterArt = null;
+    }
+    
+    // 新增：带角色信息的构造函数
+    public BattlePlayer(string playerName, int hp, int atk, int charIndex, bool skills = false)
+    {
+        name = playerName;
+        maxHP = hp;
+        currentHP = hp;
+        attack = atk;
+        isEliminated = false;
+        characterIndex = charIndex;
+        hasSkills = skills;
+        characterArt = null;
     }
 
     public void TakeDamage(int damage)
@@ -34,9 +54,6 @@ public class BattlePlayer
         return !isEliminated && currentHP > 0;
     }
 
-    /// <summary>
-    /// 更新血量（用于回合间恢复等情况）
-    /// </summary>
     public void UpdateHP(int newHP)
     {
         currentHP = newHP;
@@ -47,9 +64,6 @@ public class BattlePlayer
         }
     }
 
-    /// <summary>
-    /// 更新攻击力
-    /// </summary>
     public void UpdateAttack(int newAttack)
     {
         attack = newAttack;

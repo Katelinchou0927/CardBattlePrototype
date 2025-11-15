@@ -1,43 +1,249 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
+using TMPro;
+using System.Collections;
 
 public class StartMenu : MonoBehaviour
 {
     [Header("UI References")]
-    public GameObject startButton; // 直接引用StartButton
+    public GameObject startButton;
+    public GameObject quitButton;        // 新增这行
     public CharacterSelectionUI characterSelectionUI;
-
+    
+    [Header("Story Intro Panel")]
+    public GameObject storyIntroPanel;
+    public Button continueButton;
+    public TextMeshProUGUI introText;
+    public CanvasGroup storyPanelCanvasGroup;
+    
+    [Header("Story Pages")]
+    [TextArea(5, 10)]
+    public string[] storyPages;  // 多页文字数组
+    
+    [Header("Animation Settings")]
+    public float fadeInDuration = 1.0f;
+    public float fadeOutDuration = 0.5f;
+    
+    [Header("Typewriter Settings")]
+    public float typingSpeed = 0.05f;
+    public bool useTypewriterEffect = true;
+    public AudioSource typingSound;
+    
+    private int currentPageIndex = 0;
+    private Coroutine typewriterCoroutine;
+    private bool isTyping = false;
+    
     void Start()
     {
-        // 确保开始时显示开始按钮
         ShowStartButton();
+        
+        if (continueButton != null)
+        {
+            continueButton.onClick.RemoveAllListeners();
+            continueButton.onClick.AddListener(OnContinueClicked);
+        }
+        
+        if (storyPanelCanvasGroup != null)
+        {
+            storyPanelCanvasGroup.alpha = 0f;
+        }
     }
-
-    /// <summary>
-    /// 显示开始按钮
-    /// </summary>
+    
     void ShowStartButton()
     {
         if (startButton != null)
             startButton.SetActive(true);
-            
-        // 确保角色选择界面隐藏
+    
+        if (quitButton != null)              // 新增
+            quitButton.SetActive(true);      // 新增
+        
+        if (storyIntroPanel != null)
+            storyIntroPanel.SetActive(false);
+        
         if (characterSelectionUI != null)
             characterSelectionUI.HideCharacterSelection();
+        
+        currentPageIndex = 0;
     }
-
-    /// <summary>
-    /// 开始游戏按钮点击事件 - 显示角色选择
-    /// </summary>
+    
     public void StartGame()
     {
-        Debug.Log("[StartMenu] Start Game clicked - showing character selection");
-        
-        // 隐藏开始按钮
+        Debug.Log("[StartMenu] Start Game clicked - showing story intro");
+    
         if (startButton != null)
             startButton.SetActive(false);
+    
+        if (quitButton != null)              // 新增
+            quitButton.SetActive(false);     // 新增
             
-        // 显示角色选择界面
+        if (storyIntroPanel != null && storyPages != null && storyPages.Length > 0)
+        {
+            storyIntroPanel.SetActive(true);
+            currentPageIndex = 0;
+            StartCoroutine(ShowStoryIntroWithEffects());
+        }
+        else
+        {
+            Debug.LogWarning("[StartMenu] StoryIntroPanel or storyPages not assigned, skipping to character selection");
+            ShowCharacterSelection();
+        }
+    }
+    
+    IEnumerator ShowStoryIntroWithEffects()
+    {
+        if (introText != null)
+        {
+            introText.text = "";
+        }
+        
+        if (storyPanelCanvasGroup != null)
+        {
+            yield return StartCoroutine(FadeIn(storyPanelCanvasGroup, fadeInDuration));
+        }
+        
+        ShowCurrentPage();
+    }
+    
+    void ShowCurrentPage()
+    {
+        if (introText == null || storyPages == null || currentPageIndex >= storyPages.Length)
+            return;
+        
+        string currentText = storyPages[currentPageIndex];
+        
+        if (useTypewriterEffect)
+        {
+            if (typewriterCoroutine != null)
+            {
+                StopCoroutine(typewriterCoroutine);
+            }
+            typewriterCoroutine = StartCoroutine(TypewriterEffect(currentText));
+        }
+        else
+        {
+            introText.text = currentText;
+        }
+        
+        Debug.Log($"[StartMenu] Showing page {currentPageIndex + 1} of {storyPages.Length}");
+    }
+    
+    IEnumerator TypewriterEffect(string fullText)
+    {
+        isTyping = true;
+        introText.text = "";
+        
+        foreach (char c in fullText)
+        {
+            introText.text += c;
+            
+            if (typingSound != null && c != ' ' && c != '\n')
+            {
+                typingSound.Play();
+            }
+            
+            float delay = typingSpeed;
+            if (c == '.' || c == '!' || c == '?')
+            {
+                delay = typingSpeed * 5f;
+            }
+            else if (c == ',' || c == ';' || c == ':')
+            {
+                delay = typingSpeed * 3f;
+            }
+            else if (c == '\n')
+            {
+                delay = typingSpeed * 8f;
+            }
+            
+            yield return new WaitForSeconds(delay);
+        }
+        
+        isTyping = false;
+        typewriterCoroutine = null;
+    }
+    
+    void OnContinueClicked()
+    {
+        // 如果正在打字，先完成当前页面
+        if (isTyping && typewriterCoroutine != null)
+        {
+            StopCoroutine(typewriterCoroutine);
+            typewriterCoroutine = null;
+            isTyping = false;
+            
+            if (introText != null && storyPages != null && currentPageIndex < storyPages.Length)
+            {
+                introText.text = storyPages[currentPageIndex];
+            }
+            return;  // 第一次点击只是完成打字，不翻页
+        }
+        
+        // 检查是否还有下一页
+        if (storyPages != null && currentPageIndex < storyPages.Length - 1)
+        {
+            // 显示下一页
+            currentPageIndex++;
+            ShowCurrentPage();
+            Debug.Log($"[StartMenu] Moving to page {currentPageIndex + 1}");
+        }
+        else
+        {
+            // 最后一页，进入角色选择
+            Debug.Log("[StartMenu] Last page finished - showing character selection");
+            StartCoroutine(FadeOutAndShowCharacterSelection());
+        }
+    }
+    
+    IEnumerator FadeOutAndShowCharacterSelection()
+    {
+        if (storyPanelCanvasGroup != null)
+        {
+            yield return StartCoroutine(FadeOut(storyPanelCanvasGroup, fadeOutDuration));
+        }
+        
+        if (storyIntroPanel != null)
+            storyIntroPanel.SetActive(false);
+            
+        ShowCharacterSelection();
+    }
+    
+    IEnumerator FadeIn(CanvasGroup canvasGroup, float duration)
+    {
+        if (canvasGroup == null) yield break;
+        
+        float elapsed = 0f;
+        canvasGroup.alpha = 0f;
+        
+        while (elapsed < duration)
+        {
+            elapsed += Time.deltaTime;
+            canvasGroup.alpha = Mathf.Clamp01(elapsed / duration);
+            yield return null;
+        }
+        
+        canvasGroup.alpha = 1f;
+    }
+    
+    IEnumerator FadeOut(CanvasGroup canvasGroup, float duration)
+    {
+        if (canvasGroup == null) yield break;
+        
+        float elapsed = 0f;
+        canvasGroup.alpha = 1f;
+        
+        while (elapsed < duration)
+        {
+            elapsed += Time.deltaTime;
+            canvasGroup.alpha = 1f - Mathf.Clamp01(elapsed / duration);
+            yield return null;
+        }
+        
+        canvasGroup.alpha = 0f;
+    }
+    
+    void ShowCharacterSelection()
+    {
         if (characterSelectionUI != null)
         {
             characterSelectionUI.ShowCharacterSelection();
@@ -45,44 +251,26 @@ public class StartMenu : MonoBehaviour
         else
         {
             Debug.LogError("[StartMenu] CharacterSelectionUI reference not assigned!");
-            // 备用方案：直接进入游戏
             SceneManager.LoadScene("MainBattle");
         }
     }
-
-    /// <summary>
-    /// 返回开始界面（从角色选择界面）
-    /// </summary>
+    
     public void BackToStartMenu()
     {
         ShowStartButton();
     }
-
-    /// <summary>
-    /// 退出游戏按钮点击事件
-    /// </summary>
+    
     public void QuitGame()
     {
         Debug.Log("[StartMenu] Quit Game clicked");
-        
-        #if UNITY_EDITOR
-        UnityEditor.EditorApplication.isPlaying = false;
-        #else
         Application.Quit();
-        #endif
     }
-
-    /// <summary>
-    /// 获取选择的角色索引
-    /// </summary>
+    
     public static int GetSelectedCharacterIndex()
     {
         return PlayerPrefs.GetInt("SelectedCharacterIndex", 0);
     }
-
-    /// <summary>
-    /// 检查选择的角色是否有技能
-    /// </summary>
+    
     public static bool SelectedCharacterHasSkills()
     {
         return PlayerPrefs.GetInt("HasSkills", 0) == 1;

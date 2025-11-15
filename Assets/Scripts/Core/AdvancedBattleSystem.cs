@@ -64,37 +64,92 @@ public class AdvancedBattleSystem : MonoBehaviour
     }
 
     /// <summary>
-    /// 创建所有玩家（仅第一轮调用）
-    /// </summary>
-    void CreatePlayers(int humanHP, int humanATK)
+/// 创建所有玩家（仅第一轮调用）- 包含角色分配
+/// </summary>
+void CreatePlayers(int humanHP, int humanATK)
+{
+    players.Clear();
+    
+    // 获取人类玩家选择的角色信息
+    int humanCharacterIndex = PlayerPrefs.GetInt("SelectedCharacterIndex", 0);
+    string humanCharacterName = PlayerPrefs.GetString("SelectedCharacterName", "Player");
+    bool humanHasSkills = PlayerPrefs.GetInt("HasSkills", 0) == 1;
+    
+    // 准备AI可用的角色列表（排除人类选择的角色，但允许重复）
+    List<int> availableCharacterIndices = new List<int> { 0, 1, 2 }; // 三个角色
+    availableCharacterIndices.Remove(humanCharacterIndex); // 移除人类选择的
+    
+    // 如果只剩2个角色给3个AI，随机重复一个
+    while (availableCharacterIndices.Count < 3)
     {
-        players.Clear();
-        
-        // 创建人类玩家
-        PlayerData humanPlayer = new PlayerData("You", 0, true);
-        humanPlayer.currentHP = humanHP;
-        humanPlayer.currentATK = humanATK;
-        // 从数字牌中移除已使用的牌
-        humanPlayer.numberCards.Remove(humanHP);
-        humanPlayer.numberCards.Remove(humanATK);
-        players.Add(humanPlayer);
-        
-        // 创建AI玩家
-        for (int i = 1; i < playerCount; i++)
-        {
-            PlayerData aiPlayer = new PlayerData($"AI Player {i}", i, false);
-            
-            var aiSelection = AICardSelector.GenerateAISelection(aiPlayer.playerName, i - 1);
-            aiPlayer.currentHP = aiSelection.hpCard;
-            aiPlayer.currentATK = aiSelection.atkCard;
-            aiPlayer.numberCards.Remove(aiSelection.hpCard);
-            aiPlayer.numberCards.Remove(aiSelection.atkCard);
-            
-            players.Add(aiPlayer);
-        }
-        
-        Debug.Log($"[AdvancedBattle] Created {players.Count} players");
+        int randomIndex = availableCharacterIndices[Random.Range(0, availableCharacterIndices.Count)];
+        availableCharacterIndices.Add(randomIndex);
     }
+    
+    // 打乱顺序
+    for (int i = availableCharacterIndices.Count - 1; i > 0; i--)
+    {
+        int j = Random.Range(0, i + 1);
+        int temp = availableCharacterIndices[i];
+        availableCharacterIndices[i] = availableCharacterIndices[j];
+        availableCharacterIndices[j] = temp;
+    }
+    
+    // 获取角色名称
+    string[] characterNames = GetCharacterNames();
+    
+    // 创建人类玩家
+    PlayerData humanPlayer = new PlayerData(humanCharacterName, 0, true);
+    humanPlayer.currentHP = humanHP;
+    humanPlayer.currentATK = humanATK;
+    humanPlayer.characterIndex = humanCharacterIndex;
+    humanPlayer.hasSkills = humanHasSkills;
+    humanPlayer.characterName = humanCharacterName;
+    humanPlayer.numberCards.Remove(humanHP);
+    humanPlayer.numberCards.Remove(humanATK);
+    players.Add(humanPlayer);
+    
+    Debug.Log($"[AdvancedBattle] Human player: {humanCharacterName} (Index: {humanCharacterIndex}, Skills: {humanHasSkills})");
+    
+    // 创建AI玩家
+    for (int i = 0; i < 3; i++)
+    {
+        int aiCharacterIndex = availableCharacterIndices[i];
+        string aiCharacterName = characterNames[aiCharacterIndex];
+        bool aiHasSkills = (aiCharacterIndex != 0); // 角色0没有技能
+        
+        PlayerData aiPlayer = new PlayerData(aiCharacterName, i + 1, false);
+        aiPlayer.characterIndex = aiCharacterIndex;
+        aiPlayer.hasSkills = aiHasSkills;
+        aiPlayer.characterName = aiCharacterName;
+        
+        var aiSelection = AICardSelector.GenerateAISelection(aiPlayer.playerName, i);
+        aiPlayer.currentHP = aiSelection.hpCard;
+        aiPlayer.currentATK = aiSelection.atkCard;
+        aiPlayer.numberCards.Remove(aiSelection.hpCard);
+        aiPlayer.numberCards.Remove(aiSelection.atkCard);
+        
+        players.Add(aiPlayer);
+        
+        Debug.Log($"[AdvancedBattle] AI Player {i + 1}: {aiCharacterName} (Index: {aiCharacterIndex}, Skills: {aiHasSkills})");
+    }
+    
+    Debug.Log($"[AdvancedBattle] Created {players.Count} players with character assignments");
+}
+    
+    /// <summary>
+    /// 获取角色名称数组
+    /// </summary>
+    string[] GetCharacterNames()
+    {
+        return new string[]
+        {
+            "Anne Percy",    // 角色0
+            "Freya Percy",   // 角色1
+            "Lena Moro"      // 角色2
+        };
+    }
+    
 
     /// <summary>
     /// 更新玩家数值（第2-5轮调用）
@@ -871,7 +926,7 @@ int CalculateFinalDamage(PlayerData attacker, PlayerData target, string attacker
     }
 
     /// <summary>
-    /// 初始化UI显示
+    /// 初始化UI显示 - 包含角色信息
     /// </summary>
     void InitializeUIDisplay()
     {
@@ -880,27 +935,32 @@ int CalculateFinalDamage(PlayerData attacker, PlayerData target, string attacker
             Debug.LogError("[AdvancedBattle] UI Manager not assigned!");
             return;
         }
-        
+    
         List<BattlePlayer> battlePlayers = new List<BattlePlayer>();
-        
+    
         foreach (var player in players)
         {
+            // 使用角色名称，不是简单的 "You" 或 "AI Player X"
+            string displayName = $"{player.characterName} (Score: {player.totalScore})";
+        
             BattlePlayer bp = new BattlePlayer(
-                $"{player.playerName} (Score: {player.totalScore})",
+                displayName,
                 player.currentHP,
-                player.currentATK
+                player.currentATK,
+                player.characterIndex,
+                player.hasSkills
             );
-            
+        
             player.battlePlayerRef = bp;
             battlePlayers.Add(bp);
-            
-            Debug.Log($"[AdvancedBattle] Created BattlePlayer for {player.playerName}: HP={bp.currentHP}, ATK={bp.attack}");
+        
+            Debug.Log($"[AdvancedBattle] Created BattlePlayer: {player.characterName} (CharIndex: {player.characterIndex}, HP={bp.currentHP}, ATK={bp.attack})");
         }
-        
+    
         uiManager.InitializePlayers(battlePlayers);
-        uiManager.ShowBattleUI(); // 确保战斗UI显示
-        
-        Debug.Log("[AdvancedBattle] UI initialized with all players, battle UI shown");
+        uiManager.ShowBattleUI();
+    
+        Debug.Log("[AdvancedBattle] UI initialized with character assignments");
     }
 
     /// <summary>
@@ -984,38 +1044,60 @@ int CalculateFinalDamage(PlayerData attacker, PlayerData target, string attacker
         }
     }
 
-    /// <summary>
-    /// Updated end game with English text
-    /// </summary>
     void EndGame()
     {
         gameActive = false;
-    
+
         PlayerData winner = players.OrderByDescending(p => p.totalScore).First();
-    
+
         Debug.Log($"[AdvancedBattle] GAME END! Winner: {winner.playerName} with {winner.totalScore} points");
-    
+
         if (uiManager != null)
         {
             uiManager.AddBattleLog($"=== GAME COMPLETED ===");
             uiManager.AddBattleLog($"WINNER: {winner.playerName} with {winner.totalScore} points!");
-        
-            // Show final scores in English
+    
             uiManager.AddBattleLog("Final Standings:");
             foreach (var player in players.OrderByDescending(p => p.totalScore))
             {
                 uiManager.AddBattleLog($"  {player.playerName}: {player.totalScore} points");
             }
-        
+    
             if (winner.battlePlayerRef != null)
             {
                 uiManager.ShowBattleEnd(winner.battlePlayerRef);
             }
         }
-    
-        // Reset skills for next game
+
         SkillUIManager.ResetAllSkills();
-    
+
         OnGameEnd?.Invoke(winner);
+    
+        // 新增：显示结局界面
+        StartCoroutine(ShowEndingAfterDelay(winner));
+    }
+
+    /// <summary>
+    /// 延迟显示结局界面
+    /// </summary>
+    IEnumerator ShowEndingAfterDelay(PlayerData winner)
+    {
+        yield return new WaitForSeconds(3f);
+    
+        EndingUIManager endingUI = FindObjectOfType<EndingUIManager>();
+        if (endingUI != null)
+        {
+            // 只需要传递winner，结局类型会根据winner的角色索引自动判断
+            endingUI.ShowEnding(winner);
+        
+            if (uiManager != null)
+            {
+                uiManager.HideBattleUI();
+            }
+        }
+        else
+        {
+            Debug.LogWarning("[AdvancedBattle] EndingUIManager not found!");
+        }
     }
 }
