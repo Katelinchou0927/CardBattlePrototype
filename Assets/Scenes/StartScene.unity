@@ -2715,12 +2715,12 @@ MonoBehaviour:
   - characterName: 
     description: 
     skillDescriptions: []
-    characterArt: {fileID: 21300000, guid: 696608852f6874c4794b620c396a1520, type: 3}
+    characterArt: {fileID: 21300000, guid: 64432158f3d0367418822d2f373a719d, type: 3}
     hasSkills: 0
   - characterName: 
     description: 
     skillDescriptions: []
-    characterArt: {fileID: 21300000, guid: 92f4f4f85619b3b42bfda7212fd2daba, type: 3}
+    characterArt: {fileID: 21300000, guid: 7326267216e3915478cb9dcddbc152a9, type: 3}
     hasSkills: 0
   skillTextStyle:
     preferredSize: {x: 1200, y: 60}

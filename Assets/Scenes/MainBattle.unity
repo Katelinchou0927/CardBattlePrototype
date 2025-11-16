@@ -941,7 +941,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 1300421063}
   m_Direction: 2
   m_Value: 0
-  m_Size: 0.9999806
+  m_Size: 0.9999419
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -4836,56 +4836,55 @@ MonoBehaviour:
   systemVictoryBackground: {fileID: 0}
   silencersVictoryText: 'Emergency Bulletin
 
-    
 
-    The Silencers carried out
-    a coordinated strike on the Central Signal Grid before dawn, disabling core surveillance
-    modules across multiple districts. Large sectors of the city experienced sudden
-    memory restitution and uncontrolled information flow. Officials warn of "cognitive
-    instability" and urge citizens to remain compliant.
 
-    
+    The Silencers carried out a coordinated
+    strike on the Central Signal Grid before dawn, disabling core surveillance modules
+    across multiple districts. Large sectors of the city experienced sudden memory
+    restitution and uncontrolled information flow. Officials warn of "cognitive instability"
+    and urge citizens to remain compliant.
 
-    Enforcement
-    units suffered heavy losses during the breach of the Nuwa maintenance wing. Control
-    has not been fully restored, and the system continues to operate in a degraded
-    state. Analysts describe the event as the most serious disruption in recent years.
 
-    
 
-    The
-    Silencers broadcast a brief statement claiming this marks "the beginning of restoration."
+    Enforcement units suffered heavy
+    losses during the breach of the Nuwa maintenance wing. Control has not been fully
+    restored, and the system continues to operate in a degraded state. Analysts describe
+    the event as the most serious disruption in recent years.
 
-    
+
+
+    The Silencers
+    broadcast a brief statement claiming this marks "the beginning of restoration."
+
+
 
     Authorities
     deny any collapse of order.'
   systemVictoryText: 'Authorized Release
 
-    
+
 
     Administrative forces successfully
     neutralized the extremist group responsible for last night''s attempted attack
     on the Central Signal Grid. The system remained stable, and all compromised nodes
     were restored within minutes.
 
-    
 
-    The northern cell of the Silencers
-    has been dismantled. Surviving members were taken into custody for cognitive
-    evaluation, and several external districts have been placed under reinforced
-    supervision. Additional memory audits will be conducted citywide to prevent ideological
-    spread.
 
-    
+    The northern cell of the Silencers has been
+    dismantled. Surviving members were taken into custody for cognitive evaluation,
+    and several external districts have been placed under reinforced supervision.
+    Additional memory audits will be conducted citywide to prevent ideological spread.
 
-    Officials declare the situation resolved and confirm that
-    order has been "fully re-established."
 
-    
 
-    Deviation metrics remain
-    below critical thresholds.'
+    Officials
+    declare the situation resolved and confirm that order has been "fully re-established."
+
+
+
+    Deviation
+    metrics remain below critical thresholds.'
   fadeInDuration: 1.5
   useTypewriterEffect: 1
   typingSpeed: 0.03
@@ -5391,8 +5390,8 @@ MonoBehaviour:
   playerCardPrefab: {fileID: 4182438373205334908, guid: 57b6d7251df058a43af9e1d298ffb012, type: 3}
   characterArtSprites:
   - {fileID: 21300000, guid: 39bb389d19a6d7d46b2074740a4ddf86, type: 3}
-  - {fileID: 21300000, guid: 696608852f6874c4794b620c396a1520, type: 3}
-  - {fileID: 21300000, guid: 92f4f4f85619b3b42bfda7212fd2daba, type: 3}
+  - {fileID: 21300000, guid: 64432158f3d0367418822d2f373a719d, type: 3}
+  - {fileID: 21300000, guid: 7326267216e3915478cb9dcddbc152a9, type: 3}
   roundText: {fileID: 1748665869}
   turnText: {fileID: 1378464313}
   battleLogText: {fileID: 642843735}
@@ -6174,7 +6173,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: -0.000031292893}
+  m_AnchoredPosition: {x: 0, y: 0.00007490205}
   m_SizeDelta: {x: 0, y: 300}
   m_Pivot: {x: 0, y: 1}
 --- !u!1 &2057079935
